@@ -1,0 +1,11 @@
+#summary Design doc for the project
+
+= Introduction =
+We lay out the design for the project here. This will help a lot when we do our writeup, as we will be able to copy most of it directly to the writeup.
+
+= Design =
+
+==Initial Setup==
+  * we need to read in the sequence from a FASTA file. We are thinking of using BioJava for this, but need to evaluate it's ease of use and performance.
+  * We need some kind of HMM object that will store the parameters for the model
+  * We need to iterate over the sequence with the object, and output the most probable original state.
