@@ -1,13 +1,7 @@
-#summary One-sentence summary of this page.
+#summary List of tasks to be done for project.
 
-= Introduction =
+= Design =
+  *design the algorithm
 
-Add your content here.
-
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+= Implementation =
+  *implement the algorithm
