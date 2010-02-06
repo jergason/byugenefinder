@@ -1,7 +1,7 @@
 #summary List of tasks to be done for project.
 
 = Design =
-  *design the algorithm
+  * design the algorithm
 
 = Implementation =
-  *implement the algorithm
+  * implement the algorithm
