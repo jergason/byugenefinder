@@ -12,42 +12,28 @@ import java.util.List;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.lang.String;
+import bio465.hmm.HMMSequenceReader;
 
 
 public class HMM {
-	private String path;
-	private String sequence;
+	private HMMSequenceReader data = new HMMSequenceReader();
 	private String hiddenState;
+	private String sequence;
 
 	public HMM(String path) {
-		this.path = path;
 		sequence = "";
+		data.setPath(path);
 		hiddenState = "";
 		
-		//read in the FASTA sequence
 		try {
-			sequence = readInFastaSequence();
+			sequence = data.readInFastaSequence();
 		}
 		catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private String readInFastaSequence() throws IOException {
-		String seq = new String();
-		String temp = new String();
-		BufferedReader scan = new BufferedReader(new FileReader(path));
 
-		while ((temp = scan.readLine()) != null) {
-			if (temp.startsWith(">"))
-				temp = null;
-			else
-				seq += temp;
-		}
-		scan.close();
-		return seq;
-	}
 	
 	public String getSequence() {
 		return sequence;
@@ -57,7 +43,7 @@ public class HMM {
 		return hiddenState;
 	}
 	
-	public void algorithm() {
+	public void calculateHiddenState() {
 
 		List<Double> resultsB = new ArrayList<Double>();
 		List<Double> resultsI = new ArrayList<Double>();
@@ -68,39 +54,37 @@ public class HMM {
 		double[] Iactg = new double[4];
 
 		String FF;
-		System.out.print("The Sequence is: \n");
+		System.out.println("The Sequence is:");
 		System.out.println(sequence);
-		System.out
-				.print("Please input probabilities of BtoB, ItoB, BtoI, and ItoI");
-		System.out.print("\n");
+		System.out.println("Please input probabilities of BtoB, ItoB, BtoI, and ItoI");
 		for (int k = 0; k < 2; k = k + 1) {
 			B[k] = Math.log(TextIO.getlnDouble());
 			I[k] = Math.log(TextIO.getlnDouble());
 		}
-		System.out
-				.print("Please Input probabilities of Ba Bc Bt Bg and Ia Ic It Ig");
-		System.out.print("\n");
+		
+		System.out.println("Please Input probabilities of Ba Bc Bt Bg and Ia Ic It Ig");
 		for (int k = 0; k < 4; k = k + 1) {
 			Bactg[k] = Math.log(TextIO.getlnDouble());
 		}
 		for (int k = 0; k < 4; k = k + 1) {
 			Iactg[k] = Math.log(TextIO.getlnDouble());
 		}
-		System.out.print("Please input initial probabilities for state B or I");
-		System.out.print("\n");
+		
+		System.out.println("Please input initial probabilities for state B or I");
 		double pB = Math.log(TextIO.getlnDouble());
 		double pI = Math.log(TextIO.getlnDouble());
 
-		if (sequence.substring(0, 1).equals("a")) {
+		char firstChar = sequence.charAt(0);
+		if (firstChar == 'a') {
 			pB += Bactg[0];
 			pI += Iactg[0];
-		} else if (sequence.substring(0, 1).equals("c")) {
+		} else if (firstChar == 'c') {
 			pB += Bactg[1];
 			pI += Iactg[1];
-		} else if (sequence.substring(0, 1).equals("t")) {
+		} else if (firstChar == 't') {
 			pB += Bactg[2];
 			pI += Iactg[2];
-		} else if (sequence.substring(0, 1).equals("g")) {
+		} else if (firstChar == 'g') {
 			pB += Bactg[3];
 			pI += Iactg[3];
 		}
@@ -111,10 +95,31 @@ public class HMM {
 		resultsI.add(pI);
 		System.out.println(FF);
 		
-		for (int i = 1; i < sequence.length(); i = i + 1) {
+		char currentChar = 'x';
+		for (int i = 1; i < sequence.length(); i++) {
 			pB = ((pB + B[0]) > (pI + I[0])) ? (pB + B[0]) : (pI + I[0]);
 			pI = ((pB + B[1]) > (pI + I[1])) ? (pB + B[1]) : (pI + I[1]);
-
+			
+			currentChar = sequence.charAt(i);
+			switch (currentChar) {
+				case 'a':
+					pB += Bactg[0];
+					pI += Iactg[0];
+					break;
+				case 'c':
+					pB += Bactg[1];
+					pI += Iactg[1];
+					break;
+				case 't':
+					pB += Bactg[2];
+					pI += Iactg[2];
+					break;
+				case 'g':
+					pB += Bactg[3];
+					pI += Iactg[3];
+					break;
+				
+			}
 			if (sequence.substring(i, i + 1).equals("a")) {
 				pB += Bactg[0];
 				pI += Iactg[0];
