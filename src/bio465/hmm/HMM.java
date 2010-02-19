@@ -13,7 +13,9 @@ import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.IOException;
 import bio465.hmm.HMMSequenceReader;
-
+import java.util.HashMap;
+import java.util.Map;
+import java.lang.Double;
 
 public class HMM {
 	private HMMSequenceReader data = new HMMSequenceReader();
@@ -43,6 +45,83 @@ public class HMM {
 		return hiddenState;
 	}
 	
+	/*
+	 * We calculate the probability for each location on the genome.
+	 */
+	
+	public String calcHiddenState() {
+		//@TODO: make these dynamic
+		//I parameters!
+		double startI = -.699;
+		double ItoB = -.155;
+		double ItoI = -.523;
+		Map<Character, Double> IEmissions = new HashMap<Character, Double>();
+		IEmissions.put(new Character('a'), new Double(-1.0));
+		IEmissions.put(new Character('c'), new Double(-.398));
+		IEmissions.put(new Character('t'), new Double(-1.0));
+		IEmissions.put(new Character('g'), new Double(-.398));
+		
+		//B parameters!
+		double startB = -.097;
+		double BtoB = -.097;
+		double BtoI = -.669;
+		double Ba, Bc, Bg, Bt = -.602;
+		Map<Character, Double> BEmissions = new HashMap<Character, Double>();
+		BEmissions.put(new Character('a'), new Double(-.602));
+		BEmissions.put(new Character('c'), new Double(-.602));
+		BEmissions.put(new Character('t'), new Double(-.602));
+		BEmissions.put(new Character('g'), new Double(-.602));
+		
+		//Variables used in loop to store previous states
+		String stringI = "I";
+		String stringB = "B";
+		String previousStringI = "I";
+		String previousStringB = "B";
+		
+		double probI, probB, prevProbI, prevProbB;
+		probI = prevProbI= startI + IEmissions.get(sequence.charAt(0));
+		probB = prevProbB = startB + BEmissions.get(sequence.charAt(0));
+		double comeFromI, comeFromB = 0;
+		char currentChar = 'x';
+		
+		for (int i = 1; i < sequence.length(); i++) {
+			//The new probB is the maximum of coming from I and emitting the current char in B
+			// and coming from B and emitting the current char in B
+			currentChar = sequence.charAt(i);
+			comeFromI = ItoB + BEmissions.get(currentChar);
+			comeFromB = BtoB + BEmissions.get(currentChar);
+			probB = Math.max(prevProbI + comeFromI, prevProbB + comeFromB);
+			
+			//determine where we came from to find out what string to add a B onto
+			//@TODO: make this double comparison better
+			if ((probB - comeFromB) == prevProbB) {
+				//we know we came from B, and emitted a B
+				stringB = previousStringB + "B";
+			}
+			else {
+				stringB = previousStringI + "B";
+			}
+			
+			//now calculate state for I
+			comeFromI = ItoI + IEmissions.get(currentChar);
+			comeFromB = BtoI + IEmissions.get(currentChar);
+			probI = Math.max(prevProbI + comeFromI, prevProbB + comeFromB);
+			
+			if ((probI - comeFromI) == prevProbI) {
+				stringI = previousStringI + "I";
+			}
+			else {
+				stringI = previousStringB + "B";
+			}
+			
+			//set up the previous probabilities and strings
+			previousStringB = stringB;
+			previousStringI = stringI;
+			prevProbI = probI;
+			prevProbB = probB;
+		}
+		return (probI > probB) ? stringI : stringB;
+	}
 	public void calculateHiddenState() {
 
 		List<Double> resultsB = new ArrayList<Double>();
@@ -75,19 +154,27 @@ public class HMM {
 		double pI = Math.log(TextIO.getlnDouble());
 
 		char firstChar = sequence.charAt(0);
-		if (firstChar == 'a') {
+		switch (firstChar) {
+		case 'a':
 			pB += Bactg[0];
 			pI += Iactg[0];
-		} else if (firstChar == 'c') {
+			break;
+		case 'c':
 			pB += Bactg[1];
 			pI += Iactg[1];
-		} else if (firstChar == 't') {
+			break;
+		case 't':
 			pB += Bactg[2];
 			pI += Iactg[2];
-		} else if (firstChar == 'g') {
+			break;
+		case 'g':
 			pB += Bactg[3];
 			pI += Iactg[3];
-		}
+			break;
+		default:
+			System.out.println("Error: problem reading gene sequence.");
+			break;
+	}
 		FF = (pB > pI) ? "B" : "I";
 		System.out.println(pB);
 		resultsB.add(pB);
@@ -118,21 +205,11 @@ public class HMM {
 					pB += Bactg[3];
 					pI += Iactg[3];
 					break;
-				
+				default:
+					System.out.println("Error: problem reading gene sequence.");
+					break;
 			}
-			if (sequence.substring(i, i + 1).equals("a")) {
-				pB += Bactg[0];
-				pI += Iactg[0];
-			} else if (sequence.substring(i, i + 1).equals("c")) {
-				pB += Bactg[1];
-				pI += Iactg[1];
-			} else if (sequence.substring(i, i + 1).equals("t")) {
-				pB += Bactg[2];
-				pI += Iactg[2];
-			} else if (sequence.substring(i, i + 1).equals("g")) {
-				pB += Bactg[3];
-				pI += Iactg[3];
-			}
+			
 			FF = (pB > pI) ? "B" : "I";
 			System.out.println(pB);
 			resultsB.add(pB);
