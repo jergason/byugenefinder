@@ -11,12 +11,23 @@ We lay out the design for the project here. This will help a lot when we do our 
   * We need to iterate over the sequence with the object, and output the most probable original state.
 
 ==HMM Class==
-The HMM class will read in a DNA sequence using the HMMSequenceReader in FASTA format. It also reads in the HMM parameters from a file. It then calculates the most likely hidden state for the DNA sequence using the following implementation:
-The parameters are all converted into logarithms of their original values to enable the probabilities to be calculated using addition. The starting probabilities for each state are calculated as the probability of starting in that state plus the probability of emitting the first nucleotide. Two strings are created to store the sequence of hidden states, which will be referred to as I for and island state and B for a non-island state.
+I refers to an island state and B refers to B a non-island state.
+The HMMGeneFinder reads in a DNA sequence in FASTA format. It also reads in the HMM parameters from a file. It then calculates the most likely hidden state for the DNA sequence using the following implementation:
+The parameters are all converted into logarithms of their original values to enable the probabilities to be calculated using addition. The starting probabilities for each state are calculated as the probability of starting in that state plus the probability of emitting the first nucleotide. Four strings are created to store the sequence of hidden states for I and B, and the previous sequence of hidden states for I and B.
 The program then loops through each nucleotide in the sequence after the first one. The same algorithm is used to calculate the probabilities for the two states, so I will only outline the algorithm for calculating the probability of an I state and its state sequence. For each nucleotide, the probability of coming from I to I and emitting the current nucleotide is stored, along with the probability of coming from B to I and emitting the current nucleotide. The probability of being in an I and emitting that nucleotide is calculated as the maximum of two values: the previous I probability plus the probability of coming from I and emitting the current nucleotide, and the previous B probability plus the probability of coming from B and emitting the current nucleotide.
 {{{
-comeFromI = ItoI + I(currentNucleotide);
-comeFromB = BtoI + I(currentNucleotide);
-probabilityI = max(previousProbabilityI + comeFromI, previousProbabiltyB + comeFromB);
+comeFromI = ItoI + I(currentNucleotide)
+comeFromB = BtoI + I(currentNucleotide)
+probabilityI = max(previousProbabilityI + comeFromI, previousProbabiltyB + comeFromB)
 }}}
-Once the max
+Once the new probability for I has been found, we must find out where we came from to get that probability. This is done by subtracting the comeFromI probability from probabilityI and comparing it to previousProbabilityI. If they are equal, then we arrived at this state from I, and can add an I onto the sequence of hidden states coming from I to obtain the new sequence of states for I. If they are not equal, then we know we arrived here from state B, and can add an I onto the end of the previous sequence of hidden states coming from B to obtain the new sequence of hidden states for I.
+{{{
+if ((probabilityI - comeFromI) == previousProbabilityI)
+  seqI = previousSeqI + I
+else
+  seqI = previousSeqB + I
+}}}
+
+
+==Implementation Details==
+The probabilities were stored as floats, and comparing float equality directly doesn't work because of precision errors. They were compared by subtracting them and checking if the absolute value of the result was within a certain range of zero. If it was, then the floats were considered equal.
