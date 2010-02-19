@@ -29,7 +29,7 @@ public class HMMSequenceReader {
 				seq += temp;
 		}
 		scan.close();
-		return seq;
+		return seq.toLowerCase();
 	}
 	
 	public String getPath() {

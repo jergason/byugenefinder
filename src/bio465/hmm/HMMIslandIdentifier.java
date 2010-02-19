@@ -22,6 +22,7 @@ public class HMMIslandIdentifier {
 			window = state.substring(i, i + windowSize);
 			ICount = window.replaceAll("B", "").length();
 			if ((double)(ICount/windowSize) > threshold) {
+				//store a state object in a list containing the number of islands, and the percentage
 				//@TODO: mark this region as a state
 			}
 		}
