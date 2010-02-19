@@ -1,7 +1,12 @@
 package bio465.hmm;
-import java.util.List;
-import java.util.LinkedList;
 
+import bio465.hmm.Island;
+import java.util.List;
+import java.util.ArrayList;
+
+/*
+ * Returns a list of island states
+ */
 public class HMMIslandIdentifier {
 	private int windowSize = 0;
 	private double threshold = 0;
@@ -10,7 +15,7 @@ public class HMMIslandIdentifier {
 	public HMMIslandIdentifier(int windowSize, double threshold) {
 		this.windowSize = windowSize;
 		this.threshold = threshold;
-		islandStates = new LinkedList<Island>();
+		islandStates = new ArrayList<Island>();
 	}
 	
 	/*
@@ -18,56 +23,63 @@ public class HMMIslandIdentifier {
 	 * the sequence. If the ratio of Is to Bs is higher
 	 * than threshold mark that region as containing a CpG 
 	 * island.
+	 * 
+	 * @return a list of CpG islands
 	 */
-	public void identifyCpGIslands(String state) {
+	public List<Island> identifyCpGIslands(String state) {
 		String window;
 		int ICount;
 		double CpGRatio;
-		for (int i = 0; i < state.length(); i++) {
+		for (int i = 0; i < state.length() - windowSize; i++) {
 			window = state.substring(i, i + windowSize);
 			ICount = window.replaceAll("B", "").length();
 			CpGRatio = (double)ICount / windowSize;
 			if (CpGRatio > threshold) {
-				//store a state object in a list containing the number of islands, and the percentage
-				//@TODO: mark this region as a state
-				islandStates.add(new Island(CpGRatio, i, i + windowSize));
+				//store the CpG ratio, start and end locations of the island.
+				//locations should be stored as 1-offset, so we add 1 to index in string
+				islandStates.add(new Island(CpGRatio, i + 1, i + 1 + windowSize));
+			}
+		}
+		mergeOverlappingIslands(state);
+		return islandStates;
+	}
+
+	/*
+	 * Loop through list of islands and merge overlapping islands.
+	 * Depends on the islandStates list being sorted in ascending
+	 * order by startOfIsland, which they should be by default.
+	 */
+	private void mergeOverlappingIslands(String state) {
+		for (int i = 0; i < islandStates.size() - 1; i++) {
+			Island a = islandStates.get(i);
+			Island b = islandStates.get(i + 1);
+			if (islandsDoOverlap(a, b)) {
+				//remove the two overlapping islands, merge them together, and
+				// insert the now island in their place.
+				islandStates.remove(a);
+				islandStates.remove(b);
+				a = mergeOverlappingIslands(a, b, state);
+				islandStates.add(i, a);
+				//Decrement i so next time through the loop we check if the newly
+				// inserted island overlaps the next one.
+				i--;
 			}
 		}
 	}
 	
-	private class Island {
-		public double CpGRatio = 0;
-		public int startOfIsland = 0;
-		public int endOfIsland = 0;
-		
-		public Island(double CpG, int start, int end) {
-			CpGRatio = CpG;
-			startOfIsland = start;
-			endOfIsland = end;
-		}
-
-		public double getCpGRatio() {
-			return CpGRatio;
-		}
-
-		public void setCpGRatio(double cpGRatio) {
-			CpGRatio = cpGRatio;
-		}
-
-		public int getStartOfIsland() {
-			return startOfIsland;
-		}
-
-		public void setStartOfIsland(int startOfIsland) {
-			this.startOfIsland = startOfIsland;
-		}
-
-		public int getEndOfIsland() {
-			return endOfIsland;
-		}
-
-		public void setEndOfIsland(int endOfIsland) {
-			this.endOfIsland = endOfIsland;
-		}
+	//@TODO: Why are some islands ending up with a lower island ratio?
+	private Island mergeOverlappingIslands(Island a, Island b, String state) {
+		//@TODO: calculate the CG content?
+		//String window = sequence.substring(a.getStartOfIsland() - 1, b.getEndOfIsland() - 1);
+		int numIslands = state.substring(a.getStartOfIsland() - 1, b.getEndOfIsland() - 1).replaceAll("B", "").length();
+		double islandRatio = (double)numIslands / (b.getEndOfIsland() - a.getStartOfIsland());
+		return new Island(islandRatio, a.getStartOfIsland(), b.getEndOfIsland());
+	}
+	
+	/*
+	 * Returns true if island a ends inside of island b.
+	 */
+	private Boolean islandsDoOverlap(Island a, Island b) {
+		return a.getEndOfIsland() > b.getStartOfIsland();
 	}
 }
