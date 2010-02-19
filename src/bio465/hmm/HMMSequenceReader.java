@@ -16,17 +16,17 @@ public class HMMSequenceReader {
 	}
 	
 	public String readInFastaSequence() throws IOException {
-		String seq = new String();
-		String temp = new String();
+		StringBuilder buffer = new StringBuilder();
+		String temp = "";
 		BufferedReader scan = new BufferedReader(new FileReader(path));
 
 		while ((temp = scan.readLine()) != null) {
 			if (temp.startsWith(">"))
 				temp = null;
 			else
-				seq += temp;
+				buffer.append(temp);
 		}
 		scan.close();
-		return seq.toLowerCase();
+		return buffer.toString().toLowerCase();
 	}
 }
