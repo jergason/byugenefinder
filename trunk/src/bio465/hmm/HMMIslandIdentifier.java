@@ -32,7 +32,7 @@ public class HMMIslandIdentifier {
 		double CpGRatio;
 		for (int i = 0; i < state.length() - windowSize; i++) {
 			window = state.substring(i, i + windowSize);
-			ICount = window.replaceAll("B", "").length();
+			ICount = this.count(window, 'I');
 			CpGRatio = (double)ICount / windowSize;
 			if (CpGRatio > threshold) {
 				//store the CpG ratio, start and end locations of the island.
@@ -75,6 +75,21 @@ public class HMMIslandIdentifier {
 		double islandRatio = (double)numIslands / (b.getEndOfIsland() - a.getStartOfIsland());
 		return new Island(islandRatio, a.getStartOfIsland(), b.getEndOfIsland());
 	}
+	
+	private int count(String sourceString, char lookFor) {
+        if (sourceString == null) {
+                return -1;
+        }
+        
+        int count = 0;
+        for (int i = 0; i < sourceString.length(); i++) {
+                final char c = sourceString.charAt(i);
+                if (c == lookFor) {
+                        count++;
+                }
+        }
+        return count;
+}
 	
 	/*
 	 * Returns true if island a ends inside of island b.

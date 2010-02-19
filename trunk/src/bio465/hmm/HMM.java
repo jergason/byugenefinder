@@ -76,6 +76,10 @@ public class HMM {
 	 */
 	public String calculateHiddenState() {
 		//Variables used in loop to store previous states
+//		StringBuilder stringIBuilder = new StringBuilder("I");
+//		StringBuilder stringBBuilder = new StringBuilder("B");
+//		StringBuilder prevStringIBuilder = new StringBuilder("I");
+//		StringBuilder prevStringBBuilder = new StringBuilder("B");
 		String stringI = "I";
 		String stringB = "B";
 		String previousStringI = "I";
@@ -101,10 +105,13 @@ public class HMM {
 			if (doublesAreEqual((probB - comeFromB), prevProbB)) {
 				//we know we came from B, and emitted a B
 				stringB = previousStringB + "B";
+				//stringBBuilder = prevStringBBuilder;
 			}
 			else {
 				stringB = previousStringI + "B";
+				//stringBBuilder = prevStringIBuilder;
 			}
+			//stringBBuilder.append("B");
 			
 			//now calculate state for I
 			comeFromI = iToI + iEmissions.get(currentChar);
@@ -113,18 +120,24 @@ public class HMM {
 			
 			if (doublesAreEqual((probI - comeFromI), prevProbI)) {
 				stringI = previousStringI + "I";
+				//stringIBuilder = prevStringIBuilder;
 			}
 			else {
-				stringI = previousStringB + "B";
+				stringI = previousStringB + "I";
+				//stringIBuilder = prevStringBBuilder;
 			}
+			//stringIBuilder.append("I");
 			
 			//set up the previous probabilities and strings
 			previousStringB = stringB;
 			previousStringI = stringI;
+//			prevStringIBuilder = stringIBuilder;
+//			prevStringBBuilder = stringBBuilder;
 			prevProbI = probI;
 			prevProbB = probB;
 		}
 		return (probI > probB) ? stringI : stringB;
+		//return (probI > probB) ? stringIBuilder.toString() : stringBBuilder.toString();
 	}
 	
 	public String getSequence() {
