@@ -12,25 +12,22 @@ import bio465.hmm.HMMSequenceReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileNotFoundException;
 
 public class HMM {
 	final static double comparisonThreshold = .05;
 	private HMMSequenceReader data = new HMMSequenceReader();
-	private String hiddenState;
 	private String sequence;
-	private double Istart, ItoI, ItoB, Bstart, BtoB, BtoI = 0;
-	private Map<Character, Double>Iemissions;
-	private Map<Character, Double>Bemissions;
+	private double iStart, iToI, iToB, bStart, bToB, bToI = 0;
+	private Map<Character, Double>iEmissions;
+	private Map<Character, Double>bEmissions;
 
 	public HMM(String path, String parameterPath) {
 		sequence = "";
 		data.setPath(path);
-		hiddenState = "";
-		Iemissions = new HashMap<Character, Double>();
-		Bemissions = new HashMap<Character, Double>();
+		iEmissions = new HashMap<Character, Double>();
+		bEmissions = new HashMap<Character, Double>();
 		
 		try {
 			sequence = data.readInFastaSequence();
@@ -38,33 +35,30 @@ public class HMM {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		//read in parameters
-		readInParameters(parameterPath);
+		readInParametersAndStoreInIVars(parameterPath);
 	}
 	
-	//read in the parameters, store them as logs in instance vars
-	private void readInParameters(String path) {
+	private void readInParametersAndStoreInIVars(String path) {
 		FileReader file;
 		Scanner scanner;
 		try {
 			file = new FileReader(path);
 			scanner = new Scanner(file);
-			Istart = Math.log10(scanner.nextDouble());
-			ItoI = Math.log10(scanner.nextDouble());
-			ItoB = Math.log10(scanner.nextDouble());
-			Iemissions.put(Character.valueOf('a'), Double.valueOf(Math.log10(scanner.nextDouble())));
-			Iemissions.put(Character.valueOf('c'), Double.valueOf(Math.log10(scanner.nextDouble())));
-			Iemissions.put(Character.valueOf('t'), Double.valueOf(Math.log10(scanner.nextDouble())));
-			Iemissions.put(Character.valueOf('g'), Double.valueOf(Math.log10(scanner.nextDouble())));
+			iStart = Math.log10(scanner.nextDouble());
+			iToI = Math.log10(scanner.nextDouble());
+			iToB = Math.log10(scanner.nextDouble());
+			iEmissions.put(Character.valueOf('a'), Double.valueOf(Math.log10(scanner.nextDouble())));
+			iEmissions.put(Character.valueOf('c'), Double.valueOf(Math.log10(scanner.nextDouble())));
+			iEmissions.put(Character.valueOf('t'), Double.valueOf(Math.log10(scanner.nextDouble())));
+			iEmissions.put(Character.valueOf('g'), Double.valueOf(Math.log10(scanner.nextDouble())));
 			
-			Bstart = Math.log10(scanner.nextDouble());
-			BtoB = Math.log10(scanner.nextDouble());
-			BtoI = Math.log10(scanner.nextDouble());
-			Bemissions.put(Character.valueOf('a'), Double.valueOf(Math.log10(scanner.nextDouble())));
-			Bemissions.put(Character.valueOf('c'), Double.valueOf(Math.log10(scanner.nextDouble())));
-			Bemissions.put(Character.valueOf('t'), Double.valueOf(Math.log10(scanner.nextDouble())));
-			Bemissions.put(Character.valueOf('g'), Double.valueOf(Math.log10(scanner.nextDouble())));
+			bStart = Math.log10(scanner.nextDouble());
+			bToB = Math.log10(scanner.nextDouble());
+			bToI = Math.log10(scanner.nextDouble());
+			bEmissions.put(Character.valueOf('a'), Double.valueOf(Math.log10(scanner.nextDouble())));
+			bEmissions.put(Character.valueOf('c'), Double.valueOf(Math.log10(scanner.nextDouble())));
+			bEmissions.put(Character.valueOf('t'), Double.valueOf(Math.log10(scanner.nextDouble())));
+			bEmissions.put(Character.valueOf('g'), Double.valueOf(Math.log10(scanner.nextDouble())));
 			file.close();
 			scanner.close();
 		}
@@ -76,19 +70,11 @@ public class HMM {
 		}		
 	}
 	
-	public String getSequence() {
-		return sequence;
-	}
-	
-	public String getHiddenState() {
-		return hiddenState;
-	}
-	
 	/*
 	 * Returns a string containing the most probable states for each location
 	 * in the sequence.
 	 */
-	public String calcHiddenState() {
+	public String calculateHiddenState() {
 		//Variables used in loop to store previous states
 		String stringI = "I";
 		String stringB = "B";
@@ -100,19 +86,18 @@ public class HMM {
 		Character currentChar = new Character('x');
 		
 		//set up start probabilities for each state
-		probI = prevProbI= Istart + Iemissions.get(Character.valueOf(sequence.charAt(0)));
-		probB = prevProbB = Bstart + Bemissions.get(Character.valueOf(sequence.charAt(0)));
+		probI = prevProbI= iStart + iEmissions.get(Character.valueOf(sequence.charAt(0)));
+		probB = prevProbB = bStart + bEmissions.get(Character.valueOf(sequence.charAt(0)));
 		
 		for (int i = 1; i < sequence.length(); i++) {
 			//The new probB is the maximum of coming from I and emitting the current char in B
 			// and coming from B and emitting the current char in B
 			currentChar = Character.valueOf(sequence.charAt(i));
-			comeFromI = ItoB + Bemissions.get(currentChar);
-			comeFromB = BtoB + Bemissions.get(currentChar);
+			comeFromI = iToB + bEmissions.get(currentChar);
+			comeFromB = bToB + bEmissions.get(currentChar);
 			probB = Math.max(prevProbI + comeFromI, prevProbB + comeFromB);
 			
 			//determine where we came from to find out what string to add a B onto
-			//@TODO: make this double comparison better
 			if (doublesAreEqual((probB - comeFromB), prevProbB)) {
 				//we know we came from B, and emitted a B
 				stringB = previousStringB + "B";
@@ -122,8 +107,8 @@ public class HMM {
 			}
 			
 			//now calculate state for I
-			comeFromI = ItoI + Iemissions.get(currentChar);
-			comeFromB = BtoI + Iemissions.get(currentChar);
+			comeFromI = iToI + iEmissions.get(currentChar);
+			comeFromB = bToI + iEmissions.get(currentChar);
 			probI = Math.max(prevProbI + comeFromI, prevProbB + comeFromB);
 			
 			if (doublesAreEqual((probI - comeFromI), prevProbI)) {
@@ -140,6 +125,10 @@ public class HMM {
 			prevProbB = probB;
 		}
 		return (probI > probB) ? stringI : stringB;
+	}
+	
+	public String getSequence() {
+		return sequence;
 	}
 	
 	private Boolean doublesAreEqual(double a, double b) {

@@ -6,14 +6,12 @@ import java.io.IOException;
 
 public class HMMSequenceReader {
 	private String path;
-	private String sequence;
 	
 	public HMMSequenceReader() {
 		path = "";
-		sequence = "";
 	}
 	
-	public HMMSequenceReader(String path) {
+	public void setPath(String path) {
 		this.path = path;
 	}
 	
@@ -30,21 +28,5 @@ public class HMMSequenceReader {
 		}
 		scan.close();
 		return seq.toLowerCase();
-	}
-	
-	public String getPath() {
-		return path;
-	}
-
-	public void setPath(String path) {
-		this.path = path;
-	}
-
-	public String getSequence() {
-		return sequence;
-	}
-
-	public void setSequence(String sequence) {
-		this.sequence = sequence;
 	}
 }

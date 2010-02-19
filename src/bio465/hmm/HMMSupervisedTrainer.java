@@ -13,6 +13,8 @@ public class HMMSupervisedTrainer {
 	private String hiddenState;
 	
 	public HMMSupervisedTrainer(String path) {
-		
+		this.path = path;
 	}
+	
+	
 }
