@@ -75,8 +75,6 @@ public class HMM {
 			e.printStackTrace();
 		}		
 	}
-
-
 	
 	public String getSequence() {
 		return sequence;
@@ -87,9 +85,9 @@ public class HMM {
 	}
 	
 	/*
-	 * We calculate the probability for each location on the genome.
+	 * Returns a string containing the most probable states for each location
+	 * in the sequence.
 	 */
-	
 	public String calcHiddenState() {
 		//Variables used in loop to store previous states
 		String stringI = "I";
@@ -98,10 +96,12 @@ public class HMM {
 		String previousStringB = "B";
 		
 		double probI, probB, prevProbI, prevProbB;
-		probI = prevProbI= Istart + Iemissions.get(Character.valueOf(sequence.charAt(0)));
-		probB = prevProbB = Bstart + Bemissions.get(Character.valueOf(sequence.charAt(0)));
 		double comeFromI, comeFromB = 0;
 		Character currentChar = new Character('x');
+		
+		//set up start probabilities for each state
+		probI = prevProbI= Istart + Iemissions.get(Character.valueOf(sequence.charAt(0)));
+		probB = prevProbB = Bstart + Bemissions.get(Character.valueOf(sequence.charAt(0)));
 		
 		for (int i = 1; i < sequence.length(); i++) {
 			//The new probB is the maximum of coming from I and emitting the current char in B
