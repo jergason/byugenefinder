@@ -11,9 +11,10 @@ public class HMMDriver {
 		int windowSize = 200;
 		double threshold = .65;
 		HMM markovModel = new HMM(pathToFastaFile, pathToParams);
-		String hiddenState = markovModel.calculateHiddenState();
+		String hiddenState = markovModel.calculateHiddenStateUsingTraceback();
 		HMMIslandIdentifier islandIdentifier = new HMMIslandIdentifier(windowSize, threshold);
 		List<Island> islands = islandIdentifier.identifyCpGIslands(hiddenState);
-		System.out.println(islands);
+		System.out.println(hiddenState);
+		//System.out.println(islands);
 	}
 }
