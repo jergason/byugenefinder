@@ -92,9 +92,12 @@ public class HMMSupervisedTrainer {
 		IT = 0;
 		BT = 0;
 		int previous = 0;
-		for (Integer I : Starts) {
-			for (int i = previous; i < I.intValue(); i++)
-				switch (dnaSequence[i]) {
+		//for (Integer I : Starts) {
+		for (int i = 0; i < Starts.size(); i++) {
+			Integer startIndex = Starts.get(i);
+			Integer endIndex = Ends.get(i);
+			for (int j = previous; j < startIndex.intValue(); j++)
+				switch (dnaSequence[j]) {
 				case 'g':
 					BG++;
 				case 'G':
@@ -112,8 +115,8 @@ public class HMMSupervisedTrainer {
 				case 'T':
 					BT++;
 				}
-			for (int i = I.intValue(); i <= Ends.get(i); i++)
-				switch (dnaSequence[i]) {
+			for (int j = startIndex.intValue(); j <= endIndex.intValue(); j++)
+				switch (dnaSequence[j]) {
 				case 'g':
 					IG++;
 				case 'G':
@@ -131,7 +134,7 @@ public class HMMSupervisedTrainer {
 				case 'T':
 					IT++;
 				}
-			previous = I.intValue();
+			previous = endIndex.intValue();
 		}
 		for (int i = previous; i < dnaSequence.length; i++)
 			switch (dnaSequence[i]) {
