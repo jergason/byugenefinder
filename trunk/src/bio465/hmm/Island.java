@@ -30,6 +30,6 @@ public class Island {
 	}
 	
 	public String toCSV() {
-		return "" + startOfIsland + "," + endOfIsland;
+		return "" + startOfIsland + "," + endOfIsland + "," + islandToNonIslandRatio;
 	}
 }
