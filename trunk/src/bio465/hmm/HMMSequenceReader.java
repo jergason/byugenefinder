@@ -7,8 +7,8 @@ import java.io.IOException;
 public class HMMSequenceReader {
 	private String path;
 	
-	public HMMSequenceReader() {
-		path = "";
+	public HMMSequenceReader(String path) {
+		this.path = path;
 	}
 	
 	public void setPath(String path) {
