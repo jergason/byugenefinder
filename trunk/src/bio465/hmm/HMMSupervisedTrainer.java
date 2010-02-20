@@ -14,6 +14,8 @@ import java.io.*;
 import bio465.hmm.HMMSequenceReader;
 
 public class HMMSupervisedTrainer {
+	final static double bTweak = .2;
+	final static double iTweak = .3;
 	public float IG, BG;
 	public float IC, BC;
 	public float IA, BA;
@@ -38,30 +40,6 @@ public class HMMSupervisedTrainer {
 		setContent();
 		setTransitions();
 		writeOutParameters(pathToWriteParams);
-	}
-	
-	private void writeOutParameters(String pathToWriteParams) {
-		try {
-			PrintWriter out = new PrintWriter(new FileWriter(pathToWriteParams));
-			out.println(".5");
-			out.println(II);
-			out.println(ItoB);
-			out.println(IA);
-			out.println(IC);
-			out.println(IT);
-			out.println(IG);
-			out.println(".5");
-			out.println(BB);
-			out.println(BtoI);
-			out.println(BA);
-			out.println(BC);
-			out.println(BT);
-			out.println(BG);
-			out.close();
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public HMMSupervisedTrainer(String sequence) {
@@ -189,6 +167,12 @@ public class HMMSupervisedTrainer {
 		BB = (float)(totalBs - totalBtoI)/ totalBs;
 		BtoI = (float)totalBtoI / totalBs;
 		ItoB = (float)totalItoB / totalIs;
+		
+		//these probabilties are pretty low, so we tweak them a bit
+		II -= iTweak;
+		ItoB += iTweak;
+		BB -= bTweak;
+		BtoI += bTweak;
 	}
 
 	private void initializeParameters() {
@@ -210,5 +194,29 @@ public class HMMSupervisedTrainer {
 		Ends.add(675249);
 		Ends.add(683183);
 		Ends.add(924522);
+	}
+	
+	private void writeOutParameters(String pathToWriteParams) {
+		try {
+			PrintWriter out = new PrintWriter(new FileWriter(pathToWriteParams));
+			out.println(".1");
+			out.println(II);
+			out.println(ItoB);
+			out.println(IA);
+			out.println(IC);
+			out.println(IT);
+			out.println(IG);
+			out.println(".9");
+			out.println(BB);
+			out.println(BtoI);
+			out.println(BA);
+			out.println(BC);
+			out.println(BT);
+			out.println(BG);
+			out.close();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
