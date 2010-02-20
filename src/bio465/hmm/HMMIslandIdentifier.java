@@ -26,7 +26,7 @@ public class HMMIslandIdentifier {
 	 * 
 	 * @return a list of CpG islands
 	 */
-	public List<Island> identifyCpGIslands(String state) {
+	public String identifyCpGIslands(String state) {
 		String window;
 		int ICount;
 		double CpGRatio;
@@ -41,7 +41,7 @@ public class HMMIslandIdentifier {
 			}
 		}
 		mergeOverlappingIslands(state);
-		return islandStates;
+		return convertIslandsToCSV(islandStates);
 	}
 
 	/*
@@ -77,6 +77,13 @@ public class HMMIslandIdentifier {
 		return new Island(islandRatio, a.getStartOfIsland(), b.getEndOfIsland());
 	}
 	
+	/*
+	 * Returns true if island a ends inside of island b.
+	 */
+	private Boolean islandsDoOverlap(Island a, Island b) {
+		return a.getEndOfIsland() > b.getStartOfIsland();
+	}
+	
 	private int count(String sourceString, char lookFor) {
 		if (sourceString == null) {
 			return -1;
@@ -93,10 +100,12 @@ public class HMMIslandIdentifier {
 		return count;
 	}
 	
-	/*
-	 * Returns true if island a ends inside of island b.
-	 */
-	private Boolean islandsDoOverlap(Island a, Island b) {
-		return a.getEndOfIsland() > b.getStartOfIsland();
+	private String convertIslandsToCSV(List<Island> islands) {
+		StringBuilder islandsInCSV = new StringBuilder();
+		for (Island I : islands) {
+			islandsInCSV.append(I.toCSV());
+			islandsInCSV.append("\n");
+		}
+		return islandsInCSV.toString();
 	}
 }

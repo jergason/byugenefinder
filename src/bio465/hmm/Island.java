@@ -28,4 +28,8 @@ public class Island {
 		toReturn += "<Island from " + startOfIsland + " to " + endOfIsland + " | " + islandToNonIslandRatio + "% Island state>";
 		return toReturn;
 	}
+	
+	public String toCSV() {
+		return "" + startOfIsland + "," + endOfIsland;
+	}
 }
