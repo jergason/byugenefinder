@@ -32,7 +32,7 @@ public class HMMIslandIdentifier {
 		double CpGRatio;
 		for (int i = 0; i < state.length() - windowSize; i++) {
 			window = state.substring(i, i + windowSize);
-			ICount = this.count(window, 'I');
+			ICount = count(window, 'I');
 			CpGRatio = (double)ICount / windowSize;
 			if (CpGRatio > threshold) {
 				//store the CpG ratio, start and end locations of the island.
@@ -70,26 +70,28 @@ public class HMMIslandIdentifier {
 	//@TODO: Why are some islands ending up with a lower island ratio?
 	private Island mergeOverlappingIslands(Island a, Island b, String state) {
 		//@TODO: calculate the CG content?
-		//String window = sequence.substring(a.getStartOfIsland() - 1, b.getEndOfIsland() - 1);
-		int numIslands = state.substring(a.getStartOfIsland() - 1, b.getEndOfIsland() - 1).replaceAll("B", "").length();
-		double islandRatio = (double)numIslands / (b.getEndOfIsland() - a.getStartOfIsland());
+		int numIslandStates;
+		String overlap = state.substring(a.getStartOfIsland() - 1, b.getEndOfIsland() - 1);
+		numIslandStates = count(overlap, 'B');
+		double islandRatio = (double)numIslandStates / (b.getEndOfIsland() - a.getStartOfIsland());
 		return new Island(islandRatio, a.getStartOfIsland(), b.getEndOfIsland());
 	}
 	
 	private int count(String sourceString, char lookFor) {
-        if (sourceString == null) {
-                return -1;
-        }
-        
-        int count = 0;
-        for (int i = 0; i < sourceString.length(); i++) {
-                final char c = sourceString.charAt(i);
-                if (c == lookFor) {
-                        count++;
-                }
-        }
-        return count;
-}
+		if (sourceString == null) {
+			return -1;
+		}
+
+		int count = 0;
+		for (int i = 0; i < sourceString.length(); i++) {
+			//@TODO: why is this a final char?
+			final char c = sourceString.charAt(i);
+			if (c == lookFor) {
+				count++;
+			}
+		}
+		return count;
+	}
 	
 	/*
 	 * Returns true if island a ends inside of island b.
