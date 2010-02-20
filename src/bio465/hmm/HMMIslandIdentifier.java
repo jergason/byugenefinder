@@ -72,7 +72,7 @@ public class HMMIslandIdentifier {
 		//@TODO: calculate the CG content?
 		int numIslandStates;
 		String overlap = state.substring(a.getStartOfIsland() - 1, b.getEndOfIsland() - 1);
-		numIslandStates = count(overlap, 'B');
+		numIslandStates = count(overlap, 'I');
 		double islandRatio = (double)numIslandStates / (b.getEndOfIsland() - a.getStartOfIsland());
 		return new Island(islandRatio, a.getStartOfIsland(), b.getEndOfIsland());
 	}
