@@ -92,7 +92,6 @@ public class HMMSupervisedTrainer {
 		IT = 0;
 		BT = 0;
 		int previous = 0;
-		//for (Integer I : Starts) {
 		for (int i = 0; i < Starts.size(); i++) {
 			Integer startIndex = Starts.get(i);
 			Integer endIndex = Ends.get(i);
@@ -186,6 +185,10 @@ public class HMMSupervisedTrainer {
 			totalIs += Ends.get(i) - Starts.get(i);
 		totalIs -= Ends.size();
 		totalBs = dnaSequence.length + 1 - totalIs - Ends.size();
+		II = (float)(totalIs - totalItoB) / totalIs;
+		BB = (float)(totalBs - totalBtoI)/ totalBs;
+		BtoI = (float)totalBtoI / totalBs;
+		ItoB = (float)totalItoB / totalIs;
 	}
 
 	private void initializeParameters() {

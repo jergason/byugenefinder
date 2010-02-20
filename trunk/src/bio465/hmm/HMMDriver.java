@@ -19,7 +19,7 @@ public class HMMDriver {
 			HMMIslandIdentifier islandIdentifier = new HMMIslandIdentifier(windowSize, threshold);
 			List<Island> islands = islandIdentifier.identifyCpGIslands(hiddenState);
 			System.out.println(hiddenState);
-			//System.out.println(islands);
+			System.out.println(islands);
 		}
 		else if (args[0].equals("train")) {
 			String pathToFastaFile = args[1];

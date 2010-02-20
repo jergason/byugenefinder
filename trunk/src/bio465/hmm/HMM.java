@@ -116,10 +116,10 @@ public class HMM {
 	private String calculateTraceback(double[] iProbs, double[]bProbs, String sequence) {
 		//start at end of sequence and trace backwards.
 		char currentChar;
-		char[] backwardsTraceback = new char[sequence.length()];
+		char[] traceback = new char[sequence.length()];
 		double comeFromI, comeFromB, currentProbability;
 		Boolean tracingFromI = (iProbs[sequence.length() - 1] > bProbs[sequence.length() - 1]);
-		backwardsTraceback[sequence.length() - 1] = (tracingFromI) ? 'I' : 'B';
+		traceback[sequence.length() - 1] = (tracingFromI) ? 'I' : 'B';
 		for (int i = sequence.length() - 1; i > 0; i--) {
 			currentChar = Character.valueOf(sequence.charAt(i));
 			if (tracingFromI) {
@@ -133,19 +133,19 @@ public class HMM {
 				comeFromI = iToB + bEmissions.get(currentChar);
 			}
 			if (didComeFromI(comeFromI, currentProbability, iProbs[i - 1])) {
-				backwardsTraceback[i - 1] = 'I';
+				traceback[i - 1] = 'I';
 				tracingFromI = true;
 			}
 			else {
-				backwardsTraceback[i - 1] = 'B';
+				traceback[i - 1] = 'B';
 				tracingFromI = false;
 			}
 		}
-		return getStateFromTraceback(backwardsTraceback);
+		return getStateFromTraceback(traceback);
 	}
 	
 	/*
-	 * Take an array of chars in reverse order and build a string in forward order.
+	 * Take an array of chars and build a string in forward order.
 	 */
 	private String getStateFromTraceback(char[] traceback) {
 		StringBuilder state = new StringBuilder(traceback.length);
